@@ -43,7 +43,7 @@ MainWindow::data MainWindow::filterDataCreateStruct(QStringList accelerometerAnd
     rawData.yAccelSample = dataToDouble(accelerometerAndGyroscopeData, 4);
     rawData.zAccelSample = dataToDouble(accelerometerAndGyroscopeData, 5);
 
-    if (counter < 50){
+    if (counter < 10){
          xGyroOffsetSum +=rawData.xGyroSample;
          yGyroOffsetSum +=rawData.yGyroSample;
          zGyroOffsetSum +=rawData.zGyroSample;
@@ -52,16 +52,16 @@ MainWindow::data MainWindow::filterDataCreateStruct(QStringList accelerometerAnd
          zAccelOffsetSum +=rawData.zAccelSample;
 
     }
-    else if(counter == 50)
+    else if(counter == 10)
     {
-        xGyroOffset = xGyroOffsetSum/50;
-        yGyroOffset = yGyroOffsetSum/50;
-        zGyroOffset = zGyroOffsetSum/50;
-        xAccelOffset = xAccelOffsetSum/50; // zAccel is at 0.9 becuse of gravity
-        yAccelOffset = yAccelOffsetSum/50;
-        zAccelOffset = zAccelOffsetSum/50;
+        xGyroOffset = xGyroOffsetSum/10;
+        yGyroOffset = yGyroOffsetSum/10;
+        zGyroOffset = zGyroOffsetSum/10;
+        xAccelOffset = xAccelOffsetSum/10; // zAccel is at 0.9 becuse of gravity
+        yAccelOffset = yAccelOffsetSum/10;
+        zAccelOffset = zAccelOffsetSum/10;
     }
-    else if(counter > 50)
+    else if(counter > 10)
     {
         xAccelSum += (rawData.xAccelSample - xAccelOffset);
         yAccelSum += (rawData.yAccelSample - yAccelOffset);
@@ -118,7 +118,7 @@ void MainWindow::start()
     {
         data cleanData = readUrlData();
         //send angle rotation to Cube
-        if(counter > 50){
+        if(counter > 10){
             ui->rotatingCube->setRotation(getXrotation(cleanData),getYrotation(cleanData));
             createTable(cleanData);
             emit onNumber(cleanData);
@@ -136,12 +136,12 @@ void MainWindow::createTable(MainWindow::data cleanData)
     int row = ui->tableWidget->rowCount();
     ui->tableWidget->insertRow(row);
 
-    ui->tableWidget->setItem(row,0, new QTableWidgetItem(QString::number(cleanData.xAccelSample)));
-    ui->tableWidget->setItem(row,1, new QTableWidgetItem(QString::number(cleanData.yAccelSample)));
-    ui->tableWidget->setItem(row,2, new QTableWidgetItem(QString::number(cleanData.zAccelSample)));
-    ui->tableWidget->setItem(row,3, new QTableWidgetItem(QString::number(cleanData.xGyroSample)));
-    ui->tableWidget->setItem(row,4, new QTableWidgetItem(QString::number(cleanData.yGyroSample)));
-    ui->tableWidget->setItem(row,5, new QTableWidgetItem(QString::number(cleanData.zGyroSample)));
+    ui->tableWidget->setItem(row,0, new QTableWidgetItem(QString::number(cleanData.xAccelSample,'f',2)));
+    ui->tableWidget->setItem(row,1, new QTableWidgetItem(QString::number(cleanData.yAccelSample,'f',2)));
+    ui->tableWidget->setItem(row,2, new QTableWidgetItem(QString::number(cleanData.zAccelSample,'f',2)));
+    ui->tableWidget->setItem(row,3, new QTableWidgetItem(QString::number(cleanData.xGyroSample,'f',2)));
+    ui->tableWidget->setItem(row,4, new QTableWidgetItem(QString::number(cleanData.yGyroSample,'f',2)));
+    ui->tableWidget->setItem(row,5, new QTableWidgetItem(QString::number(cleanData.zGyroSample,'f',2)));
 
     ui->tableWidget->resizeColumnsToContents();
 

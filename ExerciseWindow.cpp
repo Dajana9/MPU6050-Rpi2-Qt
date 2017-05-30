@@ -6,6 +6,9 @@ ExerciseWindow::ExerciseWindow(QWidget *parent) :
     ui(new Ui::ExerciseWindow)
 {
     ui->setupUi(this);
+    ui->recData->setStyleSheet(QString("QPushButton {background-color: white;}"));
+    ui->stopRec->setStyleSheet(QString("QPushButton {background-color: white;}"));
+
 }
 
 ExerciseWindow::~ExerciseWindow()
@@ -33,6 +36,7 @@ void ExerciseWindow::rec()
 void ExerciseWindow::stopRec()
 {
     mRec = false;
+    recData.close();
 }
 
 void ExerciseWindow::newNumber(MainWindow::data cleanData)
@@ -67,7 +71,6 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
             output << cleanData.xAccelSample <<" "<< cleanData.yAccelSample <<" "<< cleanData.zAccelSample <<" "<< xGyroSum <<" "<< yGyroSum <<" "<< cleanData.zGyroSample << "\n";
         }
     }
-
     if (yGyroSum > 2){
         ui->toDo->setText("Spusti ruku!");
        // player->setMedia(QUrl("qrc:/spustiRuku.mp3"));
@@ -113,10 +116,13 @@ void ExerciseWindow::on_stop_clicked()
 void ExerciseWindow::on_recData_clicked()
 {
     ui->start->click();
-    //put read color on push button when is working
+    ui->recData->setStyleSheet(QString("QPushButton {background-color: red;}"));
 }
 
 void ExerciseWindow::on_stopRec_clicked()
 {
     emit onStop();
+    ui->recData->setStyleSheet(QString("QPushButton {background-color: white;}"));
+    ui->start->setEnabled(true);
+
 }

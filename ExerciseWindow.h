@@ -39,6 +39,7 @@ protected:
 
     double diffAbs(double value1, double value2);
     double abs(double value);
+    QFile recData;
 signals:
      void onStop();
 

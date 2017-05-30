@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>654</width>
-    <height>493</height>
+    <width>767</width>
+    <height>528</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -63,14 +69,14 @@
      </rect>
     </property>
     <property name="text">
-     <string>http://192.168.43.50:8080/</string>
+     <string>http://192.168.1.6:8080/</string>
     </property>
    </widget>
    <widget class="QPushButton" name="exercise_button">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>50</y>
+      <x>540</x>
+      <y>60</y>
       <width>121</width>
       <height>31</height>
      </rect>
@@ -82,7 +88,7 @@
    <widget class="QPushButton" name="rawData">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>540</x>
       <y>10</y>
       <width>121</width>
       <height>31</height>
@@ -95,8 +101,8 @@
    <widget class="RotatingCube" name="rotatingCube" native="true">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>120</y>
+      <x>440</x>
+      <y>140</y>
       <width>291</width>
       <height>241</height>
      </rect>
@@ -105,12 +111,54 @@
    <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>120</y>
-      <width>251</width>
-      <height>341</height>
+      <x>20</x>
+      <y>70</y>
+      <width>351</width>
+      <height>411</height>
      </rect>
     </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOn</enum>
+    </property>
+    <property name="sizeAdjustPolicy">
+     <enum>QAbstractScrollArea::AdjustToContents</enum>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
+    </property>
+    <property name="dragDropOverwriteMode">
+     <bool>false</bool>
+    </property>
+    <column>
+     <property name="text">
+      <string>xGyro</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>yGyro</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>zGyro</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>xAccel</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>zAccel</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>zAccel</string>
+     </property>
+    </column>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

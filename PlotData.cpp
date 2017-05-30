@@ -13,18 +13,31 @@ PlotData::PlotData(QWidget *parent) :
 
 void PlotData::setupParametars()
 {
-    ui->plot->addGraph(); // blue line
+
+    ui->plot->addGraph();
     ui->plot->graph(0)->setPen(QPen(QColor(40, 110, 255)));
-    ui->plot->addGraph(); // red line
+    ui->xAccel->setStyleSheet("background-color:rgba(40, 110, 255, 60)");
+
+    ui->plot->addGraph();
     ui->plot->graph(1)->setPen(QPen(QColor(255, 110, 40)));
-    ui->plot->addGraph(); // red line
+    ui->yAccel->setStyleSheet("background-color:rgba(255, 110, 40)");
+
+    ui->plot->addGraph();
     ui->plot->graph(2)->setPen(QPen(QColor(110, 255, 40)));
-    ui->plot->addGraph(); // blue line
+    ui->zAccel->setStyleSheet("background-color:rgba(110, 255, 40, 60)");
+
+    ui->plot->addGraph();
     ui->plot->graph(3)->setPen(QPen(QColor(255, 40, 255)));
-    ui->plot->addGraph(); // red line
+    ui->xGyro->setStyleSheet("background-color:rgba(255, 40, 255, 60)");
+
+    ui->plot->addGraph();
     ui->plot->graph(4)->setPen(QPen(QColor(110, 110, 40)));
-    ui->plot->addGraph(); // red line
-    ui->plot->graph(5)->setPen(QPen(QColor(110, 40, 40)));
+    ui->yGyro->setStyleSheet("background-color:rgba(110, 110, 40, 60)");
+
+    ui->plot->addGraph();
+    ui->plot->graph(5)->setPen(QPen(QColor(255, 51, 0)));
+    ui->zGyro->setStyleSheet("background-color:rgba(255, 51, 0, 60)");
+
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -32,10 +45,14 @@ void PlotData::setupParametars()
     ui->plot->axisRect()->setupFullAxesBox();
     ui->plot->yAxis->setRange(-1.2, 1.2);
 
+
+  //  qRegisterMetaType<QCPRange>("QCPRange");
+
     // make left and bottom axes transfer their ranges to right and top axes:
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->plot->xAxis2, SLOT(setRange(QCPRange)));
     connect(ui->plot->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->plot->yAxis2, SLOT(setRange(QCPRange)));
 //    connect(accelValues,SIGNAL(clicked),this,plotAccelData());
+
 
     // setup a timer that repeatedly calls MainWindow::realtimeDataSlot:
    // connect(&dataTimer, SIGNAL(timeout()), this, SLOT(realtimeDataSlot()));
@@ -98,9 +115,7 @@ void PlotData::plotAxisData(int AxesDecision,MainWindow::data cleanData)
         ui->plot->graph(5)->rescaleKeyAxis(true);
         break;
 
-    }
-
-
+        }
     lastPointKey = key;
     }
     // make key axis range scroll with the data (at a constant range size of 8):
@@ -143,21 +158,92 @@ void PlotData::newNumber(MainWindow::data cleanData)
 void PlotData::on_pause_clicked()
 {
      emit onStop();
+     mStop = true;
+
+}
+
+void PlotData::stopRec()
+{
+    mStop = true;
 }
 
 
 void PlotData::on_recData_clicked()
 {
-    QFile recData("recData.csv");
-    if(recData.open(QFile::ReadOnly))
-    {
-        //read data in colums..
-        //ovisno koja je kolumna
+    qRegisterMetaType<FileReader::recDataVariables>("FileReader::recDataVariables");
 
-/*  while read all rows
- * time interval (maybe sleep or something else)
+    connect(this, &PlotData::onStop, &fileReader, &FileReader::stop);
+    connect(&fileReader, &FileReader::read ,this, &PlotData::newRecNumber);
+
+    QFuture<void> test1 = QtConcurrent::run(&this->fileReader,&FileReader::readData);
+
+   // start();
+
+}
+
+void PlotData::newRecNumber(FileReader::recDataVariables recData)
+{
+
+    MainWindow::data cleanData;
+
+    cleanData.xAccelSample = recData.xAccelSample;
+    cleanData.yAccelSample = recData.yAccelSample;
+    cleanData.zAccelSample = recData.zAccelSample;
+    cleanData.xGyroSample = recData.xGyroSample;
+    cleanData.yGyroSample = recData.yGyroSample;
+    cleanData.zGyroSample = recData.zGyroSample;
+
+    if(ui->xAccel->isChecked()){
+     plotAxisData(0, cleanData);}
+    if(ui->yAccel->isChecked()){
+     plotAxisData(1, cleanData);}
+    if(ui->zAccel->isChecked()){
+     plotAxisData(2, cleanData);}
+    if(ui->xGyro->isChecked()){
+     plotAxisData(3, cleanData);}
+    if(ui->yGyro->isChecked()){
+     plotAxisData(4, cleanData);}
+    if(ui->zGyro->isChecked()){
+     plotAxisData(5, cleanData);}
+
+}
+
+
+void PlotData::on_restart_clicked()
+{
+    ui->plot->yAxis->setRange(-1.2, 1.2);
+    ui->plot->replot();
+
+}
+void PlotData::start(){
+
+
+   /* mStop = false;
+
+    MainWindow::data cleanData;
+    QFile recData(QCoreApplication::applicationDirPath() + "/recData.csv");
+    QTextStream in(&recData);
+    QStringList data;
+    if(!recData.open(QFile::ReadOnly|QIODevice::Text))
+        return;
+    int count = 0;
+    while (mStop==false) {
+    count++;
+        QString line = in.readLine();
+        //QThread::msleep(100);
+        // sleep(1);
+        data = line.split(",");
+
+        cleanData.xAccelSample = data[0].toDouble();
+        cleanData.yAccelSample = data[1].toDouble();
+        cleanData.zAccelSample = data[2].toDouble();
+        cleanData.xGyroSample = data[3].toDouble();
+        cleanData.yGyroSample = data[4].toDouble();
+        cleanData.zGyroSample = data[5].toDouble();
+
+
         if(ui->xAccel->isChecked()){
-         plotAxisData(0, recData[0]);}
+         plotAxisData(0, cleanData);}
         if(ui->yAccel->isChecked()){
          plotAxisData(1, cleanData);}
         if(ui->zAccel->isChecked()){
@@ -167,8 +253,12 @@ void PlotData::on_recData_clicked()
         if(ui->yGyro->isChecked()){
          plotAxisData(4, cleanData);}
         if(ui->zGyro->isChecked()){
-       plotAxisData(5, cleanData);}
-  */  }
+         plotAxisData(5, cleanData);}
 
-
-}
+        qDebug()<<count;
+        qDebug()<<data;
+        qDebug()<<recData.size();
+        }
+    qDebug()<<"alo";
+       // recData.close();
+*/}

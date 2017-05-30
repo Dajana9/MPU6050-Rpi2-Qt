@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>Image/Crate.bmp</file>
+        <file>../build-RpiMpu6050-Desktop_Qt_5_7_0_GCC_64bit-Debug/recData.csv</file>
+        <file>recData.csv</file>
     </qresource>
 </RCC>

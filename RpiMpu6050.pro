@@ -20,13 +20,15 @@ SOURCES += main.cpp\
     RotatingCube.cpp \
     PlotData.cpp \
     qcustomplot.cpp \
-    ExerciseWindow.cpp
+    ExerciseWindow.cpp \
+    FileReader.cpp
 
 HEADERS  += MainWindow.h \
     RotatingCube.h \
     PlotData.h \
     qcustomplot.h \
-    ExerciseWindow.h
+    ExerciseWindow.h \
+    FileReader.h
 
 FORMS    += MainWindow.ui \
     PlotData.ui \
