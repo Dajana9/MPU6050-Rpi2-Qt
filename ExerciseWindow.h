@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "MainWindow.h"
 #include <QtMultimedia>
+#include <QTimer>
+#include <QDateTime>
 
 namespace Ui {
 class ExerciseWindow;
@@ -36,12 +38,20 @@ protected:
     double yGyroSum = 0;
     double xGyroTmp = 0;
     double yGyroTmp = 0;
+    double zGyroTmp = 0;
+
+    QTime timer;
 
     double diffAbs(double value1, double value2);
     double abs(double value);
     QFile recData;
+    void setupParametars();
+    void moveSlider();
+    void speedInterval();
 signals:
      void onStop();
+     void XvalueChanged(double value);
+     void YvalueChanged(double value);
 
 private:
     Ui::ExerciseWindow *ui;

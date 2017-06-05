@@ -19,7 +19,7 @@ public:
 
     void start();
     int counter = 0;
-
+    int sampleRate = 0;
     struct data
     {
         double xGyroSample;
@@ -59,7 +59,7 @@ protected:
     double dist(double a, double b, double c);
     double getYrotation(MainWindow::data cleanData);
     double getXrotation(MainWindow::data cleanData);
-
+    QTime timer;
     void createTable(MainWindow::data cleanData);
 private slots:
 
@@ -67,6 +67,8 @@ private slots:
     void on_pause_clicked();
     void on_exercise_button_clicked();
     void on_rawData_clicked();
+
+    void on_positionVelocity_clicked();
 
 signals:
 

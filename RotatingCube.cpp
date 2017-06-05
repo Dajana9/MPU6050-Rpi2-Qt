@@ -69,6 +69,8 @@ void RotatingCube::paintGL()
 
     glRotatef(mXRotate,1.0f,0.0f,0.0f);
     glRotatef(-mYRotate,0.0f,0.0f,1.0f);
+    glRotatef(mZRotate,1.0f,1.0f,1.0f);
+
     //glRotatef(mZRotate,0.0f,0.0f,1.0f);
 
     glBegin(GL_QUADS);
@@ -125,8 +127,7 @@ void RotatingCube::setRotationGyro(double x,double y,double z)
 
     mXRotate += x;
     mYRotate += y;
-
-  //  mZRotate = z;
+    mZRotate += z;
     loadGLTexture();
     updateGL();
 

@@ -8,6 +8,7 @@ PlotData::PlotData(QWidget *parent) :
     ui(new Ui::PlotData)
 {
     ui->setupUi(this);
+
     setupParametars();
 }
 
@@ -40,13 +41,15 @@ void PlotData::setupParametars()
 
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-    timeTicker->setTimeFormat("%h:%m:%s");
+   // timeTicker->setTimeFormat("%ms");
     ui->plot->xAxis->setTicker(timeTicker);
     ui->plot->axisRect()->setupFullAxesBox();
     ui->plot->yAxis->setRange(-1.2, 1.2);
+    ui->plot->yAxis->setLabel("Sensor values");
+    ui->plot->xAxis->setLabel("Time");
 
 
-  //  qRegisterMetaType<QCPRange>("QCPRange");
+    //qRegisterMetaType<QCPRange>("QCPRange");
 
     // make left and bottom axes transfer their ranges to right and top axes:
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->plot->xAxis2, SLOT(setRange(QCPRange)));
@@ -57,6 +60,7 @@ void PlotData::setupParametars()
     // setup a timer that repeatedly calls MainWindow::realtimeDataSlot:
    // connect(&dataTimer, SIGNAL(timeout()), this, SLOT(realtimeDataSlot()));
     //dataTimer.start(0); // Interval 0 means to refresh as fast as possible
+    timer.start();
 
 }
 
@@ -70,10 +74,21 @@ PlotData::~PlotData()
 void PlotData::plotAxisData(int AxesDecision,MainWindow::data cleanData)
 {
 
-    static QTime time(QTime::currentTime());
-    // calculate two new data points:
+    /*
+     * double key = time.elapsed()/1000; // u mislisekundama znaci dilin sa 1000
+    static double lastPointKey = 0;
+    if (key-lastPointKey > 0.05) // 20 uzoraka u sekundi
+
     double key = time.elapsed()/100.0; // time elapsed since start of demo, in seconds
     static double lastPointKey = 0;
+    if (key-lastPointKey > 0.0002) // at most add point every 2 ms
+      */
+    static QTime time(QTime::currentTime());
+    //calculate two new data points:
+    double key = time.elapsed()/100.0; // time elapsed since start of demo, in seconds ( without /100 is ms)
+    static double lastPointKey = 0;
+
+
     if (key-lastPointKey > 0.0002) // at most add point every 2 ms
     {
     switch (AxesDecision){
@@ -119,9 +134,9 @@ void PlotData::plotAxisData(int AxesDecision,MainWindow::data cleanData)
     lastPointKey = key;
     }
     // make key axis range scroll with the data (at a constant range size of 8):
-    ui->plot->xAxis->setRange(key, 15, Qt::AlignRight);
-    ui->plot->replot();
+    ui->plot->xAxis->setRange(key, 20, Qt::AlignRight);
 
+    ui->plot->replot();
 }
 
 
@@ -170,14 +185,14 @@ void PlotData::stopRec()
 
 void PlotData::on_recData_clicked()
 {
-    qRegisterMetaType<FileReader::recDataVariables>("FileReader::recDataVariables");
+   qRegisterMetaType<FileReader::recDataVariables>("FileReader::recDataVariables");
 
     connect(this, &PlotData::onStop, &fileReader, &FileReader::stop);
     connect(&fileReader, &FileReader::read ,this, &PlotData::newRecNumber);
 
     QFuture<void> test1 = QtConcurrent::run(&this->fileReader,&FileReader::readData);
 
-   // start();
+   //start();
 
 }
 
@@ -215,50 +230,3 @@ void PlotData::on_restart_clicked()
     ui->plot->replot();
 
 }
-void PlotData::start(){
-
-
-   /* mStop = false;
-
-    MainWindow::data cleanData;
-    QFile recData(QCoreApplication::applicationDirPath() + "/recData.csv");
-    QTextStream in(&recData);
-    QStringList data;
-    if(!recData.open(QFile::ReadOnly|QIODevice::Text))
-        return;
-    int count = 0;
-    while (mStop==false) {
-    count++;
-        QString line = in.readLine();
-        //QThread::msleep(100);
-        // sleep(1);
-        data = line.split(",");
-
-        cleanData.xAccelSample = data[0].toDouble();
-        cleanData.yAccelSample = data[1].toDouble();
-        cleanData.zAccelSample = data[2].toDouble();
-        cleanData.xGyroSample = data[3].toDouble();
-        cleanData.yGyroSample = data[4].toDouble();
-        cleanData.zGyroSample = data[5].toDouble();
-
-
-        if(ui->xAccel->isChecked()){
-         plotAxisData(0, cleanData);}
-        if(ui->yAccel->isChecked()){
-         plotAxisData(1, cleanData);}
-        if(ui->zAccel->isChecked()){
-         plotAxisData(2, cleanData);}
-        if(ui->xGyro->isChecked()){
-         plotAxisData(3, cleanData);}
-        if(ui->yGyro->isChecked()){
-         plotAxisData(4, cleanData);}
-        if(ui->zGyro->isChecked()){
-         plotAxisData(5, cleanData);}
-
-        qDebug()<<count;
-        qDebug()<<data;
-        qDebug()<<recData.size();
-        }
-    qDebug()<<"alo";
-       // recData.close();
-*/}

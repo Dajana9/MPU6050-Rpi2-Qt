@@ -3,6 +3,7 @@
 #include "PlotData.h"
 #include "ExerciseWindow.h"
 #include "RotatingCube.h"
+#include "PositionVelocity.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,8 +23,8 @@ MainWindow::data MainWindow::readUrlData()
     QNetworkReply *response;
     QEventLoop event;
     QString html;
-
-    response = manager.get(QNetworkRequest(QUrl(ui->URL->text()))); //mob http://192.168.43.50:8080/
+    static QString urlTxt = ui->URL->text();
+    response = manager.get(QNetworkRequest(QUrl(urlTxt))); //mob http://192.168.43.50:8080/
     QObject::connect(response,SIGNAL(finished()),&event,SLOT(quit()));
     event.exec();
     html = response->readAll();
@@ -113,12 +114,14 @@ void MainWindow::on_pause_clicked()
 
 void MainWindow::start()
 {
+    timer.start();
+    sampleRate = 0;
     mStop = false;
     while(!mStop)
     {
         data cleanData = readUrlData();
         //send angle rotation to Cube
-        if(counter > 10){
+        if(counter > 15){
             ui->rotatingCube->setRotation(getXrotation(cleanData),getYrotation(cleanData));
             createTable(cleanData);
             emit onNumber(cleanData);
@@ -194,4 +197,11 @@ double MainWindow::getXrotation(MainWindow::data cleanData)
     double degrees = radians * (180.0/3.14);
 
     return degrees;
+}
+
+void MainWindow::on_positionVelocity_clicked()
+{
+    emit onStop();
+    PositionVelocity* positionvelocity = new PositionVelocity(this);
+    positionvelocity->show();
 }

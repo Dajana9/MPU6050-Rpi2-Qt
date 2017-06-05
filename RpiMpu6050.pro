@@ -21,18 +21,21 @@ SOURCES += main.cpp\
     PlotData.cpp \
     qcustomplot.cpp \
     ExerciseWindow.cpp \
-    FileReader.cpp
+    FileReader.cpp \
+    PositionVelocity.cpp
 
 HEADERS  += MainWindow.h \
     RotatingCube.h \
     PlotData.h \
     qcustomplot.h \
     ExerciseWindow.h \
-    FileReader.h
+    FileReader.h \
+    PositionVelocity.h
 
 FORMS    += MainWindow.ui \
     PlotData.ui \
-    ExerciseWindow.ui
+    ExerciseWindow.ui \
+    PositionVelocity.ui
 
 RESOURCES += \
     rpimpu6050.qrc

@@ -16,7 +16,8 @@ class PlotData : public QMainWindow
 public:
     explicit PlotData(QWidget *parent = 0);
     ~PlotData();
-    void start();
+    QTime timer;
+
 public slots:
 
     void newNumber(MainWindow::data cleanData);

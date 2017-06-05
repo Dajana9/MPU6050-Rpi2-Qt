@@ -15,13 +15,13 @@ void FileReader::readData(){
     mStop = false;
     int count = 0;
 
-    while ( mStop == false ) {
+    while ( count < 3000 && mStop == false ) {
         count++;
 
         if(line.isNull())
           line.begin();
         line = in.readLine();
-        QThread::msleep(100);
+        QThread::msleep(50);// 20 samples in second is read--so 1/20 = 0.05 ann * 1000 = 50 ms
         // sleep(1);
         data = line.split(",");
 
@@ -41,7 +41,6 @@ void FileReader::readData(){
         }
     qDebug()<<"alo";
        // recData.close();
-
 }
 
 void FileReader::stop()
