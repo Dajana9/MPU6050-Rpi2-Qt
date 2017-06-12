@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     qcustomplot.cpp \
     ExerciseWindow.cpp \
     FileReader.cpp \
-    PositionVelocity.cpp
+    PositionVelocity.cpp \
+    ShowRecData.cpp
 
 HEADERS  += MainWindow.h \
     RotatingCube.h \
@@ -30,14 +31,18 @@ HEADERS  += MainWindow.h \
     qcustomplot.h \
     ExerciseWindow.h \
     FileReader.h \
-    PositionVelocity.h
+    PositionVelocity.h \
+    ShowRecData.h
 
 FORMS    += MainWindow.ui \
     PlotData.ui \
     ExerciseWindow.ui \
-    PositionVelocity.ui
+    PositionVelocity.ui \
+    ShowRecData.ui
 
 RESOURCES += \
     rpimpu6050.qrc
 
 LIBS += -lglut -lGLU
+
+DISTFILES +=

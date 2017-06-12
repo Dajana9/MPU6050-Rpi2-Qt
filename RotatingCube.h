@@ -27,13 +27,19 @@ public:
    explicit RotatingCube(QWidget *parent = 0);
     ~RotatingCube();
 
-    void setRotation(double xRot, double yRot);
+
     void setRotationGyro(double x, double y, double z);
+
+
+
+    void setRotation(double xRot, double yRot, MainWindow::gyroData gd);
+
+    double diffAbs(double value1, double value2);
 protected:
     void paintGL();
     void initializeGL();
     void resizeGL(int width, int height);
-
+    int texture = 0;
 
 private:
     void loadGLTexture();

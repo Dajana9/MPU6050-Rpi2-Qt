@@ -6,6 +6,7 @@ FileReader::FileReader(QObject *parent) : QObject(parent)
 
 }
 
+
 void FileReader::readData(){
 
     QFile recData(QCoreApplication::applicationDirPath() + "/recData.csv");
@@ -14,29 +15,27 @@ void FileReader::readData(){
         return;
     mStop = false;
     int count = 0;
+    QString allData;
+    allData = in.readAll();
+    allData = allData.replace("\n"," ");
+    QStringList recDataList = allData.split(" ");
+    int size = recDataList.size()/6 - 6;
 
-    while ( count < 3000 && mStop == false ) {
+    while (count <size && mStop == false ) {
         count++;
+     //   recDouble = line.toDouble();
 
-        if(line.isNull())
-          line.begin();
-        line = in.readLine();
-        QThread::msleep(50);// 20 samples in second is read--so 1/20 = 0.05 ann * 1000 = 50 ms
+        //line = in.readLine();
+        QThread::msleep(100);// 20 samples in second is read--so 1/20 = 0.05 ann * 1000 = 50 ms
         // sleep(1);
-        data = line.split(",");
+        cleanData.xAccelSample = recDataList[0 + 6*count].toDouble();
+        cleanData.yAccelSample = recDataList[1 + 6*count].toDouble();
+        cleanData.zAccelSample = recDataList[2 + 6*count].toDouble();
+        cleanData.xGyroSample = recDataList[3 + 6*count].toDouble();
+        cleanData.yGyroSample = recDataList[4 + 6*count].toDouble();
+        cleanData.zGyroSample = recDataList[5 + 6*count].toDouble();
 
-        cleanData.xAccelSample = data[0].toDouble();
-        cleanData.yAccelSample = data[1].toDouble();
-        cleanData.zAccelSample = data[2].toDouble();
-        cleanData.xGyroSample = data[3].toDouble();
-        cleanData.yGyroSample = data[4].toDouble();
-        cleanData.zGyroSample = data[5].toDouble();
-
-        qDebug()<<count;
-        qDebug()<<data;
-        qDebug()<<in.ReadPastEnd;
-
-
+        qDebug()<<cleanData.xAccelSample;
         emit read(cleanData);
         }
     qDebug()<<"alo";

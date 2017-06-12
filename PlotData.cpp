@@ -40,16 +40,18 @@ void PlotData::setupParametars()
     ui->zGyro->setStyleSheet("background-color:rgba(255, 51, 0, 60)");
 
 
-    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-   // timeTicker->setTimeFormat("%ms");
-    ui->plot->xAxis->setTicker(timeTicker);
-    ui->plot->axisRect()->setupFullAxesBox();
-    ui->plot->yAxis->setRange(-1.2, 1.2);
+//    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+//   // timeTicker->setTimeFormat("%ms");
+//    ui->plot->xAxis->setTicker(timeTicker);
+//    ui->plot->axisRect()->setupFullAxesBox();
+//    ui->plot->yAxis->setRange(-1.2, 1.2);
     ui->plot->yAxis->setLabel("Sensor values");
     ui->plot->xAxis->setLabel("Time");
 
+    ui->plot->setInteraction(QCP::iRangeDrag,true);
+    ui->plot->setInteraction(QCP::iRangeZoom,true);
 
-    //qRegisterMetaType<QCPRange>("QCPRange");
+    qRegisterMetaType<QCPRange>("QCPRange");
 
     // make left and bottom axes transfer their ranges to right and top axes:
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->plot->xAxis2, SLOT(setRange(QCPRange)));
@@ -119,13 +121,13 @@ void PlotData::plotAxisData(int AxesDecision,MainWindow::data cleanData)
         break;
 
         case 4:
-        ui->plot->graph(4)->addData(key, cleanData.yGyroSample);
+        ui->plot->graph(4)->addData(key, cleanData.yGyroSample * 100);
         ui->plot->graph(4)->rescaleValueAxis(true);
         ui->plot->graph(4)->rescaleKeyAxis(true);
         break;
 
         case 5:
-        ui->plot->graph(5)->addData(key,cleanData.zGyroSample);
+        ui->plot->graph(5)->addData(key,cleanData.zGyroSample * 100);
         ui->plot->graph(5)->rescaleValueAxis(true);
         ui->plot->graph(5)->rescaleKeyAxis(true);
         break;
@@ -142,6 +144,8 @@ void PlotData::plotAxisData(int AxesDecision,MainWindow::data cleanData)
 
 void PlotData::on_sensorValues_clicked()
 {
+    ui->recData->setDisabled(true);
+
     qRegisterMetaType<MainWindow::data>("MainWindow::data");
 
     connect(&mainwin,&MainWindow::onNumber,this,&PlotData::newNumber);
@@ -172,6 +176,9 @@ void PlotData::newNumber(MainWindow::data cleanData)
 
 void PlotData::on_pause_clicked()
 {
+    ui->sensorValues->setEnabled(true);
+    ui->recData->setEnabled(true);
+
      emit onStop();
      mStop = true;
 
@@ -185,6 +192,7 @@ void PlotData::stopRec()
 
 void PlotData::on_recData_clicked()
 {
+    ui->sensorValues->setDisabled(true);
    qRegisterMetaType<FileReader::recDataVariables>("FileReader::recDataVariables");
 
     connect(this, &PlotData::onStop, &fileReader, &FileReader::stop);
@@ -226,7 +234,21 @@ void PlotData::newRecNumber(FileReader::recDataVariables recData)
 
 void PlotData::on_restart_clicked()
 {
-    ui->plot->yAxis->setRange(-1.2, 1.2);
-    ui->plot->replot();
+    ui->sensorValues->setEnabled(true);
+    ui->recData->setEnabled(true);
 
+    ui->plot->clearPlottables();
+    ui->plot->replot();
+    setupParametars();
+}
+double PlotData::dist(double a,double b) {
+
+    return sqrt((a*a)+(b*b));
+}
+
+double PlotData::diffAbs(double value1,double value2){
+return sqrt((value1 - value2)*(value1 - value2));
+}
+double PlotData::abs(double value){
+return sqrt(value*value);
 }

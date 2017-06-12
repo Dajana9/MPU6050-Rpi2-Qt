@@ -31,8 +31,26 @@ public:
     };
 //    Q_DECLARE_METATYPE(MainWindow::data)
 
+    double xGyroTmp = 0;
+    double yGyroTmp = 0;
+    double zGyroTmp = 0;
+
+    struct gyroData
+    {
+        double xGyroSum;
+        double yGyroSum;
+        double zGyroSum;
+    };
+
     MainWindow::data filterDataCreateStruct(QStringList StringValues);
     MainWindow::data readUrlData();
+    MainWindow::gyroData calculateGyroCube(MainWindow::data cleanData);
+
+    double getYrotation(MainWindow::data cleanData);
+    double getXrotation(MainWindow::data cleanData);
+    double getZrotation(MainWindow::data cleanData);
+
+    double zAccelOffset = 0;
 
 protected:
     double xAccelSum = 0;
@@ -51,14 +69,13 @@ protected:
     double zGyroOffset = 0;
     double xAccelOffset = 0;
     double yAccelOffset = 0;
-    double zAccelOffset = 0;
+
 
     double dataToDouble(QStringList StringValues, int position);
 
     double dist(double a, double b);
     double dist(double a, double b, double c);
-    double getYrotation(MainWindow::data cleanData);
-    double getXrotation(MainWindow::data cleanData);
+
     QTime timer;
     void createTable(MainWindow::data cleanData);
 private slots:

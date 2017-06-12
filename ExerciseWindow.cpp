@@ -1,6 +1,7 @@
 #include "ExerciseWindow.h"
 #include "ui_ExerciseWindow.h"
 #include <glob.h>
+#include "ShowRecData.h"
 
 ExerciseWindow::ExerciseWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,10 +23,10 @@ void ExerciseWindow::setupParametars()
     ui->recData->setStyleSheet(QString("QPushButton {background-color: white;}"));
     ui->stopRec->setStyleSheet(QString("QPushButton {background-color: white;}"));
 
-    ui->xGyroSlider->setMinimum(-450);
-    ui->xGyroSlider->setMaximum(450);
-    ui->yGyroSlider->setMinimum(-450);
-    ui->yGyroSlider->setMaximum(450);
+    ui->xGyroSlider->setMinimum(-90);
+    ui->xGyroSlider->setMaximum(90);
+    ui->yGyroSlider->setMinimum(-90);
+    ui->yGyroSlider->setMaximum(90);
 
 }
 
@@ -56,18 +57,21 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
     connect(ui->recData, SIGNAL(clicked()), this, SLOT(rec()));
     connect(ui->stopRec,SIGNAL(clicked()), this,SLOT(stopRec()));
 
-    // sum yGyro values so that the angle actualy stays as long
-    // as we dont move our hand the proper way wait for
-    // 50 samples to pass because of calculating offset
-    if(diffAbs(cleanData.xGyroSample,xGyroTmp) > 0.01){
-        xGyroSum +=cleanData.xGyroSample;
-    }
-    xGyroTmp = cleanData.xGyroSample;
+    // sum yGyro values so that the angle actualy stays in position as long
+    // as we dont move the hand
 
-    if(diffAbs(cleanData.yAccelSample,yGyroTmp) > 0.01){
-        yGyroSum +=cleanData.yGyroSample;
+    double xGyro = cleanData.xGyroSample * 2.68; // so that sumated valeu at 90° is 90° :)
+    double yGyro = cleanData.yGyroSample * 2.68;
+
+    if(diffAbs(xGyro,xGyroTmp) > 0.01){
+        xGyroSum +=xGyro;
     }
-    yGyroTmp = cleanData.yGyroSample;
+    xGyroTmp = xGyro;
+
+    if(diffAbs(yGyro,yGyroTmp) > 0.01){
+        yGyroSum +=yGyro;
+    }
+    yGyroTmp = yGyro;
 
     //remove the drift with help of accel values
     if(abs(cleanData.xAccelSample) < 0.05 && abs(cleanData.yAccelSample) < 0.05){
@@ -83,31 +87,45 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
             output << cleanData.xAccelSample <<" "<< cleanData.yAccelSample <<" "<< cleanData.zAccelSample <<" "<< xGyroSum <<" "<< yGyroSum <<" "<< cleanData.zGyroSample << "\n";
         }
     }
+    else
+        recData.close();
 
-    if (yGyroSum > 2){
+    double xAxisMove = xGyroSum + mainwin.getXrotation(cleanData);
+    double yAxisMove = yGyroSum + mainwin.getYrotation(cleanData);
+
+    //move slider values
+    int valX = qRound(xAxisMove);
+    int valY = qRound(yAxisMove);
+    ui->xGyroSlider->setValue(valX); // correct your hand movemant
+    ui->yGyroSlider->setValue(valY);// raise your hand / lower your arm
+
+
+    int flag = 0;
+    if (yAxisMove > 35){
         ui->addText->setText("Spusti ruku!");
-
        // player->setMedia(QUrl("qrc:/spustiRuku.mp3"));
        // player->play();
+        flag = 1;
     }
-    else if(yGyroSum < -2 && cleanData.zAccelSample < -0.0005){
+    else if(yAxisMove < -35){
         ui->addText->setText("Podigni ruku!");
-
        // player->setMedia(QUrl("qrc:/podigniRuku.mp3"));
        // player->play();
+        flag = 1;
 
     }
-    else if(xGyroSum < -2 || xGyroSum > 2){
+    else if(xAxisMove < -35 || xAxisMove > 35){
         ui->addText->setText("Ispravi ruku!");
-
        // player->setMedia(QUrl("qrc:/ispraviRuku.mp3"));
        // player->play();
+        flag = 1;
 
     }
-    else if(yGyroSum < -4 || yGyroSum > 4){
+    // drift can cause values to grow to much so we need to secure the possibility
+    else if(yAxisMove < -50 || yAxisMove > 50){
         yGyroSum = 0;
     }
-    else if(xGyroSum < -4 || xGyroSum > 4){
+    else if(xAxisMove < -50 || xAxisMove > 50){
         xGyroSum = 0;
     }
     else{
@@ -117,13 +135,15 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
     if((zGyroTmp > 0 && cleanData.zGyroSample < 0 )||(zGyroTmp < 0 && cleanData.zGyroSample > 0 ))
     {
     speedInterval();
+    if (flag == 0){
+        countExercise++;
+        ui->counter->setText(QString::number(countExercise));
+    }
+
     }
     zGyroTmp = cleanData.zGyroSample;
 
     moveSlider();
-
-
-
 }
 
 
@@ -134,31 +154,24 @@ void ExerciseWindow::speedInterval()
     //ui->time->setText(QString::number(milisec) + " ");
     int index = ui->speedInterval->currentIndex();
     if(index == 1){
-        if(milisec < 600){
+        if(milisec < 200){
             ui->addSpeed->setText("Sloweeer");
         }
-        else if(milisec > 900){
+        else if(milisec > 800){
             ui->addSpeed->setText("Fasteer");
         }
         else ui->addSpeed->setText("Good");
     }
     if(index == 2){
-        if(milisec < 900){
+        if(milisec < 800){
             ui->addSpeed->setText("Sloweeer");
-        }else if(milisec > 1200){
+        }else if(milisec > 1300){
             ui->addSpeed->setText("Fasteer");
         }
         else ui->addSpeed->setText("Good");
     }
     if(index == 3){
-        if(milisec < 1200){
-            ui->addSpeed->setText("Sloweeer");
-        }else if(milisec > 1500){
-            ui->addSpeed->setText("Fasteer");
-        }
-    }
-    if(index == 4){
-        if(milisec < 1500){
+        if(milisec < 1300){
             ui->addSpeed->setText("Sloweeer");
         }else if(milisec > 2000){
             ui->addSpeed->setText("Fasteer");
@@ -171,12 +184,7 @@ void ExerciseWindow::speedInterval()
 
 void ExerciseWindow::moveSlider()
 {
-    double x = xGyroSum * 100;
-    double y = yGyroSum * 100;
-    int valX = qRound(x);
-    int valY = qRound(y);
-    ui->xGyroSlider->setValue(valX);
-    ui->yGyroSlider->setValue(valY);
+
 
 }
 
@@ -191,6 +199,7 @@ return sqrt(value*value);
 void ExerciseWindow::on_stop_clicked()
 {
     ui->start->setEnabled(true);
+    countExercise = 0;
     emit onStop();
 
 }
@@ -207,4 +216,13 @@ void ExerciseWindow::on_stopRec_clicked()
     ui->recData->setStyleSheet(QString("QPushButton {background-color: white;}"));
     ui->start->setEnabled(true);
 
+}
+
+
+
+void ExerciseWindow::on_showRec_clicked()
+{
+    emit onStop();
+    ShowRecData* showrecdata = new ShowRecData(this);
+    showrecdata->show();
 }

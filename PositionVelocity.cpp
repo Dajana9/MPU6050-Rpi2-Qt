@@ -2,6 +2,7 @@
 #include "ui_PositionVelocity.h"
 #include "MainWindow.h"
 #include <cmath>
+#include "ExerciseWindow.h"
 
 PositionVelocity::PositionVelocity(QWidget *parent) :
     QMainWindow(parent),
@@ -149,6 +150,11 @@ void PositionVelocity::plotAxisData(int AxesDecision,double accel, double veloci
         ui->plotPosition->graph(2)->rescaleKeyAxis(true);
         break;
 
+    case 3:
+        ui->plotPosition->yAxis->setRange(-0.5,0.5);
+        ui->plotVelocity->yAxis->setRange(-0.5,0.5);
+        ui->plotAccel->yAxis->setRange(-0.5,0.5);
+        break;
         }
     lastPointKey = key;
     }
@@ -172,50 +178,57 @@ void PositionVelocity::on_sensorValues_clicked()
 
 
     QFuture<void> test = QtConcurrent::run(&this->mainwin,&MainWindow::start);
+    timer2.start();
+
 
 }
 
 void PositionVelocity::newNumber(MainWindow::data cleanData)
 {
 
-    MainWindow var;
-    ax1 = cos(cleanData.zGyroSample)*cleanData.xAccelSample + sin(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleracija u X smjeru
-    ay1 = -sin(cleanData.zGyroSample)*cleanData.xAccelSample + cos(cleanData.zGyroSample)*cleanData.yAccelSample;
-    // YAcc[i]=-sin(kut[i])*XAcc1[i]+cos(kut[i])*YAcc1[i]; //akceleracija u Y smjer
+    ExerciseWindow ew;
+    ax1 = cos(cleanData.zGyroSample)*cleanData.xAccelSample + sin(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleration in x direction
+    ay1 = -sin(cleanData.zGyroSample)*cleanData.xAccelSample + cos(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleration in y direction
 
     double deltaT = 0.023;
-    int f = 35;
 
     ax1 = ax1 * 100;
     vx1 = vx0 + (ax1 + ax0)/2 * deltaT;
     ay1 = ay1 * 100;
     vy1 = vy0 + (ay1 + ay0)/2 *deltaT;
 
-    if((ax0 > 0 && ax1 < 0 && vx1 > 0.5)||(ax0 < 0 && ax1 > 0 && vx1 < -0.5))
+    if(ew.diffAbs(vx1,vx0) > 0.05 && (ew.abs(ax1) > 0.05)){
+        vx1Total +=vx1;
+    }
+    if(ew.diffAbs(vy1,vy0) > 0.01 && (ew.abs(ay1) > 0.01)){
+        vy1Total +=vy1;
+    }
+    if((ax0 > 0 && ax1 < 0 && vx1Total > 0.5)||(ax0 < 0 && ax1 > 0 && vx1Total < -0.5))
     {
     //sx1 = sx0 + (vx1 + vx0)/2 * deltaT;
-    sx1 = vx1;
+    sx1 = vx1Total;
     }
 
-    if((ay0 > 0 && ay1 < 0 && vy1 > 0.5)||(ay0 < 0 && ay1 > 0 && vy1 < -0.5))
+    if((ay0 > 0 && ay1 < 0 && vy1Total > 0.5)||(ay0 < 0 && ay1 > 0 && vy1Total < -0.5))
     {
     //sx1 = sx0 + (vx1 + vx0)/2 * deltaT;
-    sy1 = vy1;
+    sy1 = vy1Total;
     }
 
 
    // ui->lineEdit->setText(QString::number(sx1));
 
     //plotAxisData(0,ax1,vx1,sx1);
-    plotAxisData(1,ay1,vy1,sy1);
-
-if(timer.elapsed()%20 == 0){
+    plotAxisData(1,ay1,vy1Total,sy1);
+qDebug()<< timer.elapsed();
+if(timer.elapsed() % 2 == 0){ // a needed a restart becouse of large drift in velocity
     ax0 = 0;
     vx0 = 0;
     sx0 = 0;
     ay0 = 0;
     vy0 = 0;
     sy0 = 0;
+    qDebug()<<timer2.nsecsElapsed()<< "aloooooooooo";
 
 }
 else
@@ -322,14 +335,10 @@ return sqrt(value*value);
 
 void PositionVelocity::on_restart_clicked()
 {
-    sumSx = 0;
-    QCustomPlot *x;
-    x = ui->plotAccel;
-    setupParametars(x);
-    x = ui->plotVelocity;
-    setupParametars(x);
-    x = ui->plotPosition;
-    setupParametars(x);
+    emit onStop();
+    plotAxisData(3,0,0,0);
+
+
 }
 
 void PositionVelocity::on_plot2D_clicked()

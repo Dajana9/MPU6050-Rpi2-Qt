@@ -18,6 +18,11 @@ public:
     ~PlotData();
     QTime timer;
 
+    double dist(double a, double b);
+    double sum = 0;
+    double diffAbs(double value1, double value2);
+    double abs(double value);
+    double tmp = 0;
 public slots:
 
     void newNumber(MainWindow::data cleanData);

@@ -1,6 +1,8 @@
 #include "RotatingCube.h"
 #include <QtWidgets>
 #include <QtOpenGL>
+#include <MainWindow.h>
+#include "ExerciseWindow.h"
 
 RotatingCube::RotatingCube(QWidget *parent)
      : QGLWidget(parent), mFullScreen(false),
@@ -17,10 +19,18 @@ RotatingCube::~RotatingCube()
 }
 void RotatingCube::loadGLTexture()
 {
-    QImage image(":/Image/Crate.bmp");
-    image = image.convertToFormat(QImage::Format_RGB888);
-    image = image.mirrored();
+    QImage imageFront(":/Image/mpu-6050.jpg");
+    QImage imageBack(":/Image/mpuBack.jpg");
+    QImage imageSides(":/Image/blue.jpg");
 
+    imageFront = imageFront.convertToFormat(QImage::Format_RGB888);
+    imageFront = imageFront.mirrored();
+
+    imageBack = imageBack.convertToFormat(QImage::Format_RGB888);
+    imageBack = imageBack.mirrored();
+
+    imageSides = imageSides.convertToFormat(QImage::Format_RGB888);
+    imageSides = imageSides.mirrored();
 
     //textures[j] = new QOpenGLTexture(QImage(QString(":/images/side%1.png").arg(j + 1)).mirrored());
     glGenTextures(3, &mTexture[0]);
@@ -28,8 +38,22 @@ void RotatingCube::loadGLTexture()
     glBindTexture(GL_TEXTURE_2D, mTexture[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, image.width(),
-                 image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, imageFront.width(),
+                 imageFront.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, imageFront.bits());
+
+
+    glBindTexture(GL_TEXTURE_2D, mTexture[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, imageBack.width(),
+                 imageBack.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, imageBack.bits());
+
+    glBindTexture(GL_TEXTURE_2D, mTexture[2]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, imageSides.width(),
+                 imageSides.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, imageSides.bits());
+
 }
 
 void RotatingCube::resizeGL(int width, int height)
@@ -68,56 +92,69 @@ void RotatingCube::paintGL()
    // glBindTexture(GL_TEXTURE_2D, mTexture[mFilter]);
 
     glRotatef(mXRotate,1.0f,0.0f,0.0f);
-    glRotatef(-mYRotate,0.0f,0.0f,1.0f);
-    glRotatef(mZRotate,1.0f,1.0f,1.0f);
+    glRotatef(mYRotate,0.0f,0.0f,1.0f);
+    glRotatef(mZRotate,0.0f,1.0f,0.0f);
 
-    //glRotatef(mZRotate,0.0f,0.0f,1.0f);
-
+    glBindTexture(GL_TEXTURE_2D, mTexture[0]);//Top
     glBegin(GL_QUADS);
-
-        glNormal3f( 0.0f, 0.0f, 1.0f);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
-
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
-
         glNormal3f( 0.0f, 1.0f, 0.0f);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  0.2f, -1.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f,  0.2f,  1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f,  0.2f,  1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  0.2f, -1.0f);
+    glEnd();
 
+    glBindTexture(GL_TEXTURE_2D, mTexture[1]); //bottom
+    glBegin(GL_QUADS);
         glNormal3f( 0.0f,-1.0f, 0.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f, -0.2f, -1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f, -0.2f, -1.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -0.2f,  1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -0.2f,  1.0f);
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, mTexture[2]);//side
+    glBegin(GL_QUADS);
+        glNormal3f( 0.0f, 0.0f, 1.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -0.2f,  1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -0.2f,  1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  0.2f,  1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  0.2f,  1.0f);
+
+        glNormal3f( 0.0f, 0.0f,-1.0f);//side
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -0.2f, -1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  0.2f, -1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  0.2f, -1.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -0.2f, -1.0f);
 
         glNormal3f( 1.0f, 0.0f, 0.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -1.0f, -1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  1.0f, -1.0f);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  1.0f,  1.0f);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -1.0f,  1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, -0.2f, -1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f( 1.0f,  0.2f, -1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f( 1.0f,  0.2f,  1.0f);
+        glTexCoord2f(0.0f, 0.0f); glVertex3f( 1.0f, -0.2f,  1.0f);
 
-        glNormal3f(-1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f, -1.0f);
-        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
-        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  1.0f,  1.0f);
-        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
-    glEnd();
+        glNormal3f(-1.0f, 0.0f, 0.0f);//side
+        glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -0.2f, -1.0f);
+        glTexCoord2f(1.0f, 0.0f); glVertex3f(-1.0f, -0.2f,  1.0f);
+        glTexCoord2f(1.0f, 1.0f); glVertex3f(-1.0f,  0.2f,  1.0f);
+        glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  0.2f, -1.0f);
+        glEnd();
 
 }
 
-void RotatingCube::setRotation(double xRot, double yRot)
+void RotatingCube::setRotation(double xRot, double yRot, MainWindow::gyroData gd)
 {
-    mXRotate = xRot;
-    mYRotate = yRot;
+    ExerciseWindow ew;
+
+    if(ew.abs(gd.xGyroSum) > ew.abs(xRot + xRot*0.1) || ew.abs(gd.xGyroSum) < ew.abs(xRot - xRot*0.1)){ //if the value is 10% less od higher
+       gd.xGyroSum = xRot;
+    }
+    if(ew.abs(gd.yGyroSum) > ew.abs(xRot + xRot*0.1) || ew.abs(gd.yGyroSum) < ew.abs(xRot - xRot*0.1)){ //if the value is 10% less od higher
+       gd.yGyroSum = yRot;
+    }
+    mXRotate = 0.7*gd.xGyroSum + 0.3 * xRot;
+    mYRotate = 0.7*gd.yGyroSum + 0.3 * yRot;
+    mZRotate = gd.zGyroSum;
     loadGLTexture();
     updateGL();
 }
@@ -132,3 +169,4 @@ void RotatingCube::setRotationGyro(double x,double y,double z)
     updateGL();
 
 }
+

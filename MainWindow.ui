@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>781</width>
+    <width>825</width>
     <height>481</height>
    </rect>
   </property>
@@ -53,7 +53,7 @@
            </size>
           </property>
           <property name="text">
-           <string>http://192.168.43.50:8080/</string>
+           <string>http://192.168.1.9:8080/</string>
           </property>
          </widget>
         </item>
@@ -260,7 +260,7 @@
       <item>
        <widget class="QTableWidget" name="tableWidget">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>

@@ -122,7 +122,8 @@ void MainWindow::start()
         data cleanData = readUrlData();
         //send angle rotation to Cube
         if(counter > 15){
-            ui->rotatingCube->setRotation(getXrotation(cleanData),getYrotation(cleanData));
+
+            ui->rotatingCube->setRotation(getXrotation(cleanData),getYrotation(cleanData),calculateGyroCube(cleanData));
             createTable(cleanData);
             emit onNumber(cleanData);
     }   }
@@ -133,6 +134,41 @@ void MainWindow::stop()
     mStop = true;
 }
 
+MainWindow::gyroData MainWindow::calculateGyroCube(MainWindow::data cleanData)
+{
+    ExerciseWindow ew;
+    gyroData gd;
+
+    cleanData.xGyroSample = cleanData.xGyroSample*2.68; //so that the max is 90°
+    cleanData.yGyroSample = cleanData.yGyroSample*2.68;
+    cleanData.zGyroSample = cleanData.zGyroSample*2.68;
+
+    if(ew.diffAbs(cleanData.xGyroSample,xGyroTmp) > 0.01){
+        gd.xGyroSum +=cleanData.xGyroSample;
+    }
+    xGyroTmp = cleanData.xGyroSample;
+
+    if(ew.diffAbs(cleanData.yGyroSample,yGyroTmp) > 0.01){
+        gd.yGyroSum +=cleanData.yGyroSample;
+    }
+    yGyroTmp = cleanData.yGyroSample;
+    if(ew.diffAbs(cleanData.zGyroSample,zGyroTmp) > 0.01){
+        gd.zGyroSum +=cleanData.zGyroSample;
+    }
+    zGyroTmp = cleanData.zGyroSample;
+
+    //remove the drift with help of accel values
+    if(ew.abs(cleanData.xAccelSample) < 0.05 && ew.abs(cleanData.yAccelSample) < 0.05){
+       gd.xGyroSum = 0;
+       gd.yGyroSum = 0;
+    }
+    if(ew.abs(cleanData.zGyroSample)< 0.1)
+    {
+        gd.zGyroSum = 0;
+    }
+
+    return gd;
+}
 void MainWindow::createTable(MainWindow::data cleanData)
 {
     ui->tableWidget->setColumnCount(6);
@@ -183,6 +219,14 @@ double MainWindow::dist(double a,double b, double c) {
     return sqrt((a*a)+(b*b)+(c*c));
 }
 
+double MainWindow::getXrotation(MainWindow::data cleanData)
+{
+    double radians = atan2(cleanData.yAccelSample,dist(cleanData.xAccelSample,cleanData.zAccelSample + zAccelOffset));
+    double degrees = radians * (180.0/3.14);
+
+    return degrees;
+}
+
 double MainWindow::getYrotation(MainWindow::data cleanData)
 {
     double radians = atan2(cleanData.xAccelSample,dist(cleanData.yAccelSample,cleanData.zAccelSample + zAccelOffset));
@@ -191,13 +235,14 @@ double MainWindow::getYrotation(MainWindow::data cleanData)
     return degrees;
 }
 
-double MainWindow::getXrotation(MainWindow::data cleanData)
+double MainWindow::getZrotation(MainWindow::data cleanData)
 {
-    double radians = atan2(cleanData.yAccelSample,dist(cleanData.xAccelSample,cleanData.zAccelSample + zAccelOffset));
+    double radians = atan2(cleanData.zAccelSample,dist(cleanData.xAccelSample,cleanData.yAccelSample));
     double degrees = radians * (180.0/3.14);
 
     return degrees;
 }
+
 
 void MainWindow::on_positionVelocity_clicked()
 {

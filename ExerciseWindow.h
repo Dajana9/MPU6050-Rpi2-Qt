@@ -19,6 +19,11 @@ public:
     explicit ExerciseWindow(QWidget *parent = 0);
     ~ExerciseWindow();
 
+    double diffAbs(double value1, double value2);
+    double abs(double value);
+    QFile recData;
+
+
 private slots:
     void on_start_clicked();
 
@@ -27,6 +32,8 @@ private slots:
     void on_recData_clicked();
 
     void on_stopRec_clicked();
+
+    void on_showRec_clicked();
 
 public slots:
     void newNumber(MainWindow::data cleanData);
@@ -39,12 +46,11 @@ protected:
     double xGyroTmp = 0;
     double yGyroTmp = 0;
     double zGyroTmp = 0;
+    int countExercise = 0;
 
     QTime timer;
 
-    double diffAbs(double value1, double value2);
-    double abs(double value);
-    QFile recData;
+
     void setupParametars();
     void moveSlider();
     void speedInterval();

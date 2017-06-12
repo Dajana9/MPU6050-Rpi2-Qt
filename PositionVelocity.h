@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "qcustomplot.h"
 #include "MainWindow.h"
+#include <QElapsedTimer>
 
 namespace Ui {
 class PositionVelocity;
@@ -16,7 +17,7 @@ class PositionVelocity : public QMainWindow
 public:
     explicit PositionVelocity(QWidget *parent = 0);
     ~PositionVelocity();
-
+    QElapsedTimer timer2;
     QTime timer;
     double abs(double value);
 public slots:
@@ -47,6 +48,8 @@ protected:
     double vy0 = 0;
     double vy1 = 0;
 
+    double vx1Total = 0;
+    double vy1Total = 0;
 signals:
     void onStop();
 private slots:
