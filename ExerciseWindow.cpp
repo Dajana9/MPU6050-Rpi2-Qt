@@ -60,8 +60,10 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
     // sum yGyro values so that the angle actualy stays in position as long
     // as we dont move the hand
 
-    double xGyro = cleanData.xGyroSample * 2.68; // so that sumated valeu at 90° is 90° :)
-    double yGyro = cleanData.yGyroSample * 2.68;
+    double xGyro = cleanData.xGyroSample * 9; // so that sumated value at 90° is 90° :)
+    double yGyro = cleanData.yGyroSample * 9;
+    double zGyro = cleanData.zGyroSample * 36;
+
 
     if(diffAbs(xGyro,xGyroTmp) > 0.01){
         xGyroSum +=xGyro;
@@ -78,22 +80,21 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
         xGyroSum = 0;
         yGyroSum = 0;
     }
+    double xAxisMove = 0.3 * xGyroSum + 0.7 * cleanData.yAccelSample * 90; //xGyro axis rotation
+    double yAxisMove = 0.3 * yGyroSum - 0.7 * cleanData.xAccelSample * 90; //yGyr0 - xAccel is different orientation so it must be - before
+
     //we record xGyroSum and yGyroSum because we use that values for practice and not xGyro,yGyro
     if (mRec){
     QFile recData(QCoreApplication::applicationDirPath() + "/recData.csv");
         if(recData.open(QFile::Append |QFile::Truncate))
         {
             QTextStream output(&recData);
-            output << cleanData.xAccelSample <<" "<< cleanData.yAccelSample <<" "<< cleanData.zAccelSample <<" "<< xGyroSum <<" "<< yGyroSum <<" "<< cleanData.zGyroSample << "\n";
+            output << cleanData.xAccelSample * -90 <<" "<< cleanData.yAccelSample * 90 <<" "<< cleanData.zAccelSample * 90 <<" "<< xGyroSum <<" "<< yGyroSum <<" "<< zGyro << "\n";
         }
     }
     else
         recData.close();
 
-    double xAxisMove = xGyroSum + mainwin.getXrotation(cleanData);
-    double yAxisMove = yGyroSum + mainwin.getYrotation(cleanData);
-
-    //move slider values
     int valX = qRound(xAxisMove);
     int valY = qRound(yAxisMove);
     ui->xGyroSlider->setValue(valX); // correct your hand movemant
@@ -101,20 +102,20 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
 
 
     int flag = 0;
-    if (yAxisMove > 35){
+    if (xAxisMove > 30){
         ui->addText->setText("Spusti ruku!");
        // player->setMedia(QUrl("qrc:/spustiRuku.mp3"));
        // player->play();
         flag = 1;
     }
-    else if(yAxisMove < -35){
+    else if(xAxisMove < -30){
         ui->addText->setText("Podigni ruku!");
        // player->setMedia(QUrl("qrc:/podigniRuku.mp3"));
        // player->play();
         flag = 1;
 
     }
-    else if(xAxisMove < -35 || xAxisMove > 35){
+    else if(yAxisMove < -30 || yAxisMove > 30){
         ui->addText->setText("Ispravi ruku!");
        // player->setMedia(QUrl("qrc:/ispraviRuku.mp3"));
        // player->play();
@@ -122,10 +123,10 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
 
     }
     // drift can cause values to grow to much so we need to secure the possibility
-    else if(yAxisMove < -50 || yAxisMove > 50){
+    else if(yAxisMove < -60 || yAxisMove > 60){
         yGyroSum = 0;
     }
-    else if(xAxisMove < -50 || xAxisMove > 50){
+    else if(xAxisMove < -60 || xAxisMove > 60){
         xGyroSum = 0;
     }
     else{
@@ -141,9 +142,7 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
     }
 
     }
-    zGyroTmp = cleanData.zGyroSample;
-
-    moveSlider();
+    zGyroTmp = zGyro;
 }
 
 
@@ -151,41 +150,33 @@ void ExerciseWindow::speedInterval()
 {
 
     int milisec = timer.elapsed();
-    //ui->time->setText(QString::number(milisec) + " ");
     int index = ui->speedInterval->currentIndex();
     if(index == 1){
         if(milisec < 200){
-            ui->addSpeed->setText("Sloweeer");
+            ui->addSpeed->setText("Sporije");
         }
         else if(milisec > 800){
-            ui->addSpeed->setText("Fasteer");
+            ui->addSpeed->setText("Brze");
         }
-        else ui->addSpeed->setText("Good");
+        else ui->addSpeed->setText("Bravo");
     }
     if(index == 2){
         if(milisec < 800){
-            ui->addSpeed->setText("Sloweeer");
+            ui->addSpeed->setText("Sporije");
         }else if(milisec > 1300){
-            ui->addSpeed->setText("Fasteer");
+            ui->addSpeed->setText("Brze");
         }
-        else ui->addSpeed->setText("Good");
+        else ui->addSpeed->setText("Bravo");
     }
     if(index == 3){
         if(milisec < 1300){
-            ui->addSpeed->setText("Sloweeer");
+            ui->addSpeed->setText("Sporije");
         }else if(milisec > 2000){
-            ui->addSpeed->setText("Fasteer");
-        }
+            ui->addSpeed->setText("Brze");
+        }else
+            ui->addSpeed->setText("Bravo");
     }
     timer.start();
-
-
-}
-
-void ExerciseWindow::moveSlider()
-{
-
-
 }
 
 double ExerciseWindow::diffAbs(double value1,double value2){
@@ -217,8 +208,6 @@ void ExerciseWindow::on_stopRec_clicked()
     ui->start->setEnabled(true);
 
 }
-
-
 
 void ExerciseWindow::on_showRec_clicked()
 {

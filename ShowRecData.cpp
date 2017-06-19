@@ -41,6 +41,12 @@ void ShowRecData::setupParametars()
     ui->plot->graph(5)->setPen(QPen(QColor(255, 51, 0)));
     ui->zGyro->setStyleSheet("background-color:rgba(255, 51, 0, 60)");
 
+    ui->plot->addGraph();
+    ui->plot->graph(6)->setPen(QPen(QColor(25, 51, 0)));
+
+    ui->plot->addGraph();
+    ui->plot->graph(7)->setPen(QPen(QColor(25, 51, 0)));
+
 
    // ui->plot->axisRect()->setupFullAxesBox();
     //ui->plot->yAxis->setRange(-1, 1);
@@ -75,6 +81,8 @@ void ShowRecData::plot(int axis)
         recDouble = line.toDouble();
         ui->plot->graph(axis)->addData(count,recDouble);
 
+        ui->plot->graph(6)->addData(count,30);
+        ui->plot->graph(7)->addData(count,-30);
         //rescale value (vertical) axis to fit the current data:
         //ui->plot->graph(0)->rescaleValueAxis(true);
         //ui->plot->graph(0)->rescaleKeyAxis(true);
@@ -102,7 +110,6 @@ void ShowRecData::on_zAccel_clicked()
 void ShowRecData::on_xGyro_clicked()
 {
     plot(3);
-
 }
 
 void ShowRecData::on_yGyro_clicked()

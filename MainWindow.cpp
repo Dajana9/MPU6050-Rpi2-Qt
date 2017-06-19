@@ -95,13 +95,6 @@ void MainWindow::on_URL_OK_clicked()
     connect(this, &MainWindow::onStop ,this, &MainWindow::stop);
 
     start();
-
-
-    //connect(&network,&NetworkClass::on_number,this,&MainWindow::newNumber);
-    //connect(this,&MainWindow::on_stop, &network,&NetworkClass::stop);
-
-    //QFuture<void> test = QtConcurrent::run(&this->network,&NetworkClass::start);
-
 }
 
 
@@ -182,14 +175,9 @@ void MainWindow::createTable(MainWindow::data cleanData)
     ui->tableWidget->setItem(row,4, new QTableWidgetItem(QString::number(cleanData.yGyroSample,'f',2)));
     ui->tableWidget->setItem(row,5, new QTableWidgetItem(QString::number(cleanData.zGyroSample,'f',2)));
 
-    ui->tableWidget->resizeColumnsToContents();
-
-    if(row < 15){
-        ui->tableWidget->adjustSize();
-    }else{
-        ui->tableWidget->removeRow(0);
-    }
+    ui->tableWidget->verticalScrollBar()->setSliderPosition (ui->tableWidget->verticalScrollBar()->maximum());
 }
+
 double MainWindow::dataToDouble(QStringList StringValues, int position)
 {
   return StringValues[position].toDouble();

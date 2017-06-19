@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     qRegisterMetaType<MainWindow::data>("MainWinow::data");
     qRegisterMetaType<FileReader::recDataVariables>("FileReader::recDataVariables");
+    qRegisterMetaType<QVector<int> >("QVector<int>");
 
     w.show();
 

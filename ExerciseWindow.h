@@ -47,12 +47,8 @@ protected:
     double yGyroTmp = 0;
     double zGyroTmp = 0;
     int countExercise = 0;
-
     QTime timer;
-
-
     void setupParametars();
-    void moveSlider();
     void speedInterval();
 signals:
      void onStop();

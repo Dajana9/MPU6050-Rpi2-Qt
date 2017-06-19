@@ -35,36 +35,21 @@ void PositionVelocity::setupParametars(QCustomPlot *plot)
 
     plot->addGraph();
     plot->graph(3)->setPen(QPen(QColor(255, 40, 255)));
-    //ui->xGyro->setStyleSheet("background-color:rgba(255, 40, 255, 60)");
 
     plot->addGraph();
-    plot->graph(4)->setPen(QPen(QColor(110, 110, 40)));
-    //ui->yGyro->setStyleSheet("background-color:rgba(110, 110, 40, 60)");
-
-    plot->addGraph();
-    plot->graph(5)->setPen(QPen(QColor(255, 51, 0)));
-    //ui->zGyro->setStyleSheet("background-color:rgba(255, 51, 0, 60)");
+    plot->graph(4)->setPen(QPen(QColor(255, 40, 255)));
 
 
-    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-    timeTicker->setTimeFormat("%ms");
-    plot->xAxis->setTicker(timeTicker);
-    plot->axisRect()->setupFullAxesBox();
-    plot->yAxis->setRange(-0.2, 0.2);
-    plot->xAxis->setLabel("Time");
+//    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+//    timeTicker->setTimeFormat("%ms");
+//    plot->xAxis->setTicker(timeTicker);
+//    plot->axisRect()->setupFullAxesBox();
+//    plot->yAxis->setRange(-0.2, 0.2);
+//    plot->xAxis->setLabel("Time");
 
+    plot->setInteraction(QCP::iRangeDrag,true);
+    plot->setInteraction(QCP::iRangeZoom,true);
 
-    qRegisterMetaType<QCPRange>("QCPRange");
-
-    // make left and bottom axes transfer their ranges to right and top axes:
-    connect(plot->xAxis, SIGNAL(rangeChanged(QCPRange)), plot->xAxis2, SLOT(setRange(QCPRange)));
-    connect(plot->yAxis, SIGNAL(rangeChanged(QCPRange)), plot->yAxis2, SLOT(setRange(QCPRange)));
-//    connect(accelValues,SIGNAL(clicked),this,plotAccelData());
-
-
-    // setup a timer that repeatedly calls MainWindow::realtimeDataSlot:
-   // connect(&dataTimer, SIGNAL(timeout()), this, SLOT(realtimeDataSlot()));
-    //dataTimer.start(0); // Interval 0 means to refresh as fast as possible
     timer.start();
 
 }
@@ -156,6 +141,9 @@ void PositionVelocity::plotAxisData(int AxesDecision,double accel, double veloci
         ui->plotAccel->yAxis->setRange(-0.5,0.5);
         break;
         }
+    ui->plotAccel->graph(3)->addData(key,5);
+    ui->plotAccel->graph(4)->addData(key,-5);
+
     lastPointKey = key;
     }
     // make key axis range scroll with the data (at a constant range size of 8):
@@ -179,8 +167,6 @@ void PositionVelocity::on_sensorValues_clicked()
 
     QFuture<void> test = QtConcurrent::run(&this->mainwin,&MainWindow::start);
     timer2.start();
-
-
 }
 
 void PositionVelocity::newNumber(MainWindow::data cleanData)
@@ -190,12 +176,52 @@ void PositionVelocity::newNumber(MainWindow::data cleanData)
     ax1 = cos(cleanData.zGyroSample)*cleanData.xAccelSample + sin(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleration in x direction
     ay1 = -sin(cleanData.zGyroSample)*cleanData.xAccelSample + cos(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleration in y direction
 
-    double deltaT = 0.023;
+    double deltaT = 0.05;
 
     ax1 = ax1 * 100;
-    vx1 = vx0 + (ax1 + ax0)/2 * deltaT;
     ay1 = ay1 * 100;
-    vy1 = vy0 + (ay1 + ay0)/2 *deltaT;
+
+
+    if(ew.abs(ax1) > 15){
+         vx1 = vx0 + (ew.abs(ax1) + ew.abs(ax0))/2 * deltaT;
+         sx1 = sx0 + (ew.abs(vx1) + ew.abs(vx0))/2 * deltaT;
+    }
+    if(ew.abs(ay1) > 15){
+         vy1 = vy0 + (ay1 + ay0)/2 * deltaT;
+         sy1 = sy0 + (vy1 + vy0)/2 * deltaT;
+    }
+
+
+
+    if(timer2.elapsed()> 2){ // a needed a restart becouse of large drift in velocity
+        timer2.restart();
+        ax0 = 0;
+        vx0 = 0;
+        vx1 = 0;
+        sx0 = 0;
+        ay0 = 0;
+        vy0 = 0;
+    }
+    else
+    {
+        ax0 = ax1;
+        vx0 = vx1;
+        sx0 = sx1;
+        ay0 = ay1;
+        vy0 = vy1;
+        sy0 = sy1;
+    }
+    if(ui->xAxis->isChecked()){
+        plotAxisData(1,ax1,vx1,sx1);    }
+    if(ui->yAxis->isChecked()){
+        plotAxisData(1,ay1,vy1,sy1);    }
+   // if(ui->zAxis->isChecked()){
+     //   plotAxisData(1,ax1,vx1,sx1);    }
+}
+
+void PositionVelocity::calculateVelocityPosition(int axisChoice, MainWindow::data cleanData)
+{
+    ExerciseWindow ew;
 
     if(ew.diffAbs(vx1,vx0) > 0.05 && (ew.abs(ax1) > 0.05)){
         vx1Total +=vx1;
@@ -216,43 +242,7 @@ void PositionVelocity::newNumber(MainWindow::data cleanData)
     }
 
 
-   // ui->lineEdit->setText(QString::number(sx1));
 
-    //plotAxisData(0,ax1,vx1,sx1);
-    plotAxisData(1,ay1,vy1Total,sy1);
-qDebug()<< timer.elapsed();
-if(timer.elapsed() % 2 == 0){ // a needed a restart becouse of large drift in velocity
-    ax0 = 0;
-    vx0 = 0;
-    sx0 = 0;
-    ay0 = 0;
-    vy0 = 0;
-    sy0 = 0;
-    qDebug()<<timer2.nsecsElapsed()<< "aloooooooooo";
-
-}
-else
-{
-    ax0 = ax1;
-    vx0 = vx1;
-    sx0 = sx1;
-    ay0 = ay1;
-    vy0 = vy1;
-    sy0 = sy1;
-}
-    /*if(ui->xAxis->isChecked()){
-        calculateVelocityPosition(0,cleanData);
-    }
-    if(ui->yAxis->isChecked()){
-        calculateVelocityPosition(1,cleanData);
-    }
-    if(ui->zAxis->isChecked()){
-        calculateVelocityPosition(2,cleanData);
-    }
-*/}
-
-void PositionVelocity::calculateVelocityPosition(int axisChoice, MainWindow::data cleanData)
-{
     //losije od zGyro ali vidi se rezultat
     ax1 = cos(cleanData.zGyroSample)*cleanData.xAccelSample + sin(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleracija u X smjeru
     //ay = -sin(cleanData.zGyroSample)*cleanData.xAccelSample + cos(cleanData.zGyroSample)*cleanData.yAccelSample;

@@ -41,6 +41,7 @@ protected:
     void resizeGL(int width, int height);
     int texture = 0;
 
+    void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar);
 private:
     void loadGLTexture();
 

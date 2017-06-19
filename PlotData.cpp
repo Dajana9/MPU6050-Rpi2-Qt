@@ -75,59 +75,49 @@ PlotData::~PlotData()
 
 void PlotData::plotAxisData(int AxesDecision,MainWindow::data cleanData)
 {
-
-    /*
-     * double key = time.elapsed()/1000; // u mislisekundama znaci dilin sa 1000
-    static double lastPointKey = 0;
-    if (key-lastPointKey > 0.05) // 20 uzoraka u sekundi
-
-    double key = time.elapsed()/100.0; // time elapsed since start of demo, in seconds
-    static double lastPointKey = 0;
-    if (key-lastPointKey > 0.0002) // at most add point every 2 ms
-      */
     static QTime time(QTime::currentTime());
     //calculate two new data points:
     double key = time.elapsed()/100.0; // time elapsed since start of demo, in seconds ( without /100 is ms)
-    static double lastPointKey = 0;
-
-
+    static double lastPointKey = 0;    
     if (key-lastPointKey > 0.0002) // at most add point every 2 ms
     {
+
     switch (AxesDecision){
         case 0:
-        // add data to lines:
-        ui->plot->graph(0)->addData(key,cleanData.xAccelSample);
+
+        ui->plot->graph(0)->addData(key,cleanData.xAccelSample * 90);
         //rescale value (vertical) axis to fit the current data:
         ui->plot->graph(0)->rescaleValueAxis(true);
         ui->plot->graph(0)->rescaleKeyAxis(true);
         break;
 
         case 1:
-        ui->plot->graph(1)->addData(key,cleanData.yAccelSample);
+        ui->plot->graph(1)->addData(key,cleanData.yAccelSample * 90);
         ui->plot->graph(1)->rescaleValueAxis(true);
         ui->plot->graph(1)->rescaleKeyAxis(true);
         break;
 
         case 2:
-        ui->plot->graph(2)->addData(key,cleanData.zAccelSample);
+        ui->plot->graph(2)->addData(key,cleanData.zAccelSample * 90);
         ui->plot->graph(2)->rescaleValueAxis(true);
         ui->plot->graph(2)->rescaleKeyAxis(true);
         break;
 
         case 3:
-        ui->plot->graph(3)->addData(key, cleanData.xGyroSample);
+        ui->plot->graph(3)->addData(key, cleanData.xGyroSample * 36);
         ui->plot->graph(3)->rescaleValueAxis(true);
         ui->plot->graph(3)->rescaleKeyAxis(true);
         break;
 
         case 4:
-        ui->plot->graph(4)->addData(key, cleanData.yGyroSample * 100);
+
+        ui->plot->graph(4)->addData(key, cleanData.yGyroSample * 36);
         ui->plot->graph(4)->rescaleValueAxis(true);
         ui->plot->graph(4)->rescaleKeyAxis(true);
         break;
 
         case 5:
-        ui->plot->graph(5)->addData(key,cleanData.zGyroSample * 100);
+        ui->plot->graph(5)->addData(key,cleanData.zGyroSample * 36);
         ui->plot->graph(5)->rescaleValueAxis(true);
         ui->plot->graph(5)->rescaleKeyAxis(true);
         break;
@@ -150,8 +140,6 @@ void PlotData::on_sensorValues_clicked()
 
     connect(&mainwin,&MainWindow::onNumber,this,&PlotData::newNumber);
     connect(this,&PlotData::onStop, &mainwin,&MainWindow::stop);
-
-
     QFuture<void> test = QtConcurrent::run(&this->mainwin,&MainWindow::start);
 
 }
@@ -178,9 +166,8 @@ void PlotData::on_pause_clicked()
 {
     ui->sensorValues->setEnabled(true);
     ui->recData->setEnabled(true);
-
-     emit onStop();
-     mStop = true;
+    emit onStop();
+    mStop = true;
 
 }
 
@@ -193,20 +180,16 @@ void PlotData::stopRec()
 void PlotData::on_recData_clicked()
 {
     ui->sensorValues->setDisabled(true);
-   qRegisterMetaType<FileReader::recDataVariables>("FileReader::recDataVariables");
 
+    qRegisterMetaType<FileReader::recDataVariables>("FileReader::recDataVariables");
     connect(this, &PlotData::onStop, &fileReader, &FileReader::stop);
     connect(&fileReader, &FileReader::read ,this, &PlotData::newRecNumber);
 
     QFuture<void> test1 = QtConcurrent::run(&this->fileReader,&FileReader::readData);
-
-   //start();
-
 }
 
 void PlotData::newRecNumber(FileReader::recDataVariables recData)
 {
-
     MainWindow::data cleanData;
 
     cleanData.xAccelSample = recData.xAccelSample;
@@ -228,7 +211,6 @@ void PlotData::newRecNumber(FileReader::recDataVariables recData)
      plotAxisData(4, cleanData);}
     if(ui->zGyro->isChecked()){
      plotAxisData(5, cleanData);}
-
 }
 
 
@@ -236,19 +218,21 @@ void PlotData::on_restart_clicked()
 {
     ui->sensorValues->setEnabled(true);
     ui->recData->setEnabled(true);
-
     ui->plot->clearPlottables();
     ui->plot->replot();
     setupParametars();
 }
-double PlotData::dist(double a,double b) {
+double PlotData::dist(double a,double b)
+{
 
     return sqrt((a*a)+(b*b));
 }
 
-double PlotData::diffAbs(double value1,double value2){
-return sqrt((value1 - value2)*(value1 - value2));
+double PlotData::diffAbs(double value1,double value2)
+{
+    return sqrt((value1 - value2)*(value1 - value2));
 }
-double PlotData::abs(double value){
-return sqrt(value*value);
+double PlotData::abs(double value)
+{
+    return sqrt(value*value);
 }
