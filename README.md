@@ -28,7 +28,7 @@ The application consists of 4 parts:
  
 ![graph](https://user-images.githubusercontent.com/24511950/29194512-3ef073bc-7e2a-11e7-8639-e39dfd4c26dd.jpg)
 
- 2. Window to display information on proper exercise execution (it is made for exercise on picture above)
+ 2. Window to display information on proper exercise execution
  
 ![exerciseapp](https://user-images.githubusercontent.com/24511950/29194511-3ead84a8-7e2a-11e7-97f2-f9cee6916bdc.png)
  
