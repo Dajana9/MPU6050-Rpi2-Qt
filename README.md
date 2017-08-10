@@ -20,23 +20,25 @@ Python – script that runs on Raspberry Pi2 ( reads data from sensor and sends 
 Developed device sends data in real-time and displays it in the application.
 The device consists of Rpi2, MPU6050 and potable charger.
 
-![image](https://user-images.githubusercontent.com/24511950/29192784-08d4c5b4-7e23-11e7-9b00-7a9436632c8e.png)
+![mpuhand](https://user-images.githubusercontent.com/24511950/29194515-3fae2ee8-7e2a-11e7-8f4f-ae9853dd937a.png)
 
 The application consists of 4 parts:
 
  1. A graph in which the data from the sensor is drawn
-![image](https://user-images.githubusercontent.com/24511950/29192764-ef3d9108-7e22-11e7-9489-23c6a0d53ef7.png)
+ 
+![graph](https://user-images.githubusercontent.com/24511950/29194512-3ef073bc-7e2a-11e7-8639-e39dfd4c26dd.jpg)
 
- 2.	Window to display information on proper exercise execution 
-	  (it is made for exercise on picture above)
-![image](https://user-images.githubusercontent.com/24511950/29192770-f41c8422-7e22-11e7-99da-3a84e521ab28.png)
-![image](https://user-images.githubusercontent.com/24511950/29192774-f99cfe86-7e22-11e7-9d75-870bb5fbd185.png)
-
+ 2. Window to display information on proper exercise execution (it is made for exercise on picture above)
+ 
+![exerciseapp](https://user-images.githubusercontent.com/24511950/29194511-3ead84a8-7e2a-11e7-97f2-f9cee6916bdc.png)
+ 
  3. Recording and display of recorded data
-![image](https://user-images.githubusercontent.com/24511950/29192968-c212a4ec-7e23-11e7-8c8d-6290063fc112.png)
+
+![rec](https://user-images.githubusercontent.com/24511950/29194513-3efca1a0-7e2a-11e7-9a1d-3fdfa257dfb0.png)
  
  4. 3D model of MPU6050 that rotates in real-time, and table where data from sensor is written
-![image](https://user-images.githubusercontent.com/24511950/29192781-03da9688-7e23-11e7-9226-e8cafbcffc66.png)
+
+![mpucroped](https://user-images.githubusercontent.com/24511950/29194514-3efcf07e-7e2a-11e7-9080-0175379406ea.jpg)
 
 
 
