@@ -8,9 +8,12 @@ The topic of this project was to develop hardware support for the implementation
 ## Technology
 
 MPU6050 – integrated circuit that consists of accelerometer and gyroscope
+
 Raspberry Pi2 - single board computer, with I2C protocol connected to MPU6050
+
 Qt, C++ - cross-platform application framework in which application is created
-Python – script that runs on Raspberry Pi2 ( reads data from sensor and sends it on local area network
+
+Python – script that runs on Raspberry Pi2 (reads data from sensor and sends it on local area network)
 
 ![image](https://user-images.githubusercontent.com/24511950/29192485-e156760a-7e21-11e7-986d-016f0760806f.png)
 
