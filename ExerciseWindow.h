@@ -47,7 +47,11 @@ protected:
     double yGyroTmp = 0;
     double zGyroTmp = 0;
     int countExercise = 0;
+    int counter = 0;
+
     QTime timer;
+    QTime timer2;
+
     void setupParametars();
     void speedInterval();
 signals:

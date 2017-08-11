@@ -115,10 +115,10 @@ void MainWindow::start()
         data cleanData = readUrlData();
         //send angle rotation to Cube
         if(counter > 15){
-
             ui->rotatingCube->setRotation(getXrotation(cleanData),getYrotation(cleanData),calculateGyroCube(cleanData));
             createTable(cleanData);
             emit onNumber(cleanData);
+
     }   }
 }
 

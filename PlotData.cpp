@@ -40,11 +40,7 @@ void PlotData::setupParametars()
     ui->zGyro->setStyleSheet("background-color:rgba(255, 51, 0, 60)");
 
 
-//    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-//   // timeTicker->setTimeFormat("%ms");
-//    ui->plot->xAxis->setTicker(timeTicker);
-//    ui->plot->axisRect()->setupFullAxesBox();
-//    ui->plot->yAxis->setRange(-1.2, 1.2);
+
     ui->plot->yAxis->setLabel("Sensor values");
     ui->plot->xAxis->setLabel("Time");
 
@@ -56,12 +52,7 @@ void PlotData::setupParametars()
     // make left and bottom axes transfer their ranges to right and top axes:
     connect(ui->plot->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->plot->xAxis2, SLOT(setRange(QCPRange)));
     connect(ui->plot->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->plot->yAxis2, SLOT(setRange(QCPRange)));
-//    connect(accelValues,SIGNAL(clicked),this,plotAccelData());
 
-
-    // setup a timer that repeatedly calls MainWindow::realtimeDataSlot:
-   // connect(&dataTimer, SIGNAL(timeout()), this, SLOT(realtimeDataSlot()));
-    //dataTimer.start(0); // Interval 0 means to refresh as fast as possible
     timer.start();
 
 }
@@ -75,18 +66,19 @@ PlotData::~PlotData()
 
 void PlotData::plotAxisData(int AxesDecision,MainWindow::data cleanData)
 {
+
     static QTime time(QTime::currentTime());
     //calculate two new data points:
-    double key = time.elapsed()/100.0; // time elapsed since start of demo, in seconds ( without /100 is ms)
-    static double lastPointKey = 0;    
+    double key = time.elapsed()/100.0;
+    static double lastPointKey = 0;
+
     if (key-lastPointKey > 0.0002) // at most add point every 2 ms
     {
 
     switch (AxesDecision){
         case 0:
 
-        ui->plot->graph(0)->addData(key,cleanData.xAccelSample * 90);
-        //rescale value (vertical) axis to fit the current data:
+        ui->plot->graph(0)->addData(key,-cleanData.xAccelSample * 90);
         ui->plot->graph(0)->rescaleValueAxis(true);
         ui->plot->graph(0)->rescaleKeyAxis(true);
         break;

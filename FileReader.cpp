@@ -38,8 +38,6 @@ void FileReader::readData(){
         qDebug()<<cleanData.xAccelSample;
         emit read(cleanData);
         }
-    qDebug()<<"alo";
-       // recData.close();
 }
 
 void FileReader::stop()

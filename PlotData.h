@@ -23,6 +23,11 @@ public:
     double diffAbs(double value1, double value2);
     double abs(double value);
     double tmp = 0;
+
+    double xGyroSum = 0;
+    double yGyroSum = 0;
+    double xGyroTmp = 0;
+    double yGyroTmp = 0;
 public slots:
 
     void newNumber(MainWindow::data cleanData);

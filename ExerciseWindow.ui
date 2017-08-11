@@ -131,7 +131,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Brojac:</string>
+         <string>Counter</string>
         </property>
        </widget>
       </item>
@@ -195,22 +195,22 @@
         </property>
         <item>
          <property name="text">
-          <string>Brzina izvodenja</string>
+          <string>Speed</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>    Sporo</string>
+          <string>    Slow</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>    Srednje</string>
+          <string>    Medium</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>    Brzo</string>
+          <string>    Fast</string>
          </property>
         </item>
         <item>
@@ -435,7 +435,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Budi unutar okvira!</string>
+           <string/>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>

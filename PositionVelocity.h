@@ -18,25 +18,30 @@ public:
     explicit PositionVelocity(QWidget *parent = 0);
     ~PositionVelocity();
     QElapsedTimer timer2;
+    QElapsedTimer timer3;
     QTime timer;
     double abs(double value);
+
 public slots:
     void on_sensorValues_clicked();
     void newNumber(MainWindow::data cleanData);
     void on_pause_clicked();
+
 protected:
+
+    void plotAxisData(int AxesDecision, double accel, double velocity, double position);
+
     double velocity = 0;
     double zAccelTmp = 0;
     double zPos = 0;
     int counter = 0;
     int zMax;
-    void plotAxisData(int AxesDecision, double accel, double velocity, double position);
-    void calculateVelocityPosition(int axisChoice, MainWindow::data cleanData);
+
     double ax0 = 0;
     double ax1 = 0;
-    double sx0 = 0;
+    double sx = 0;
     double sx1 = 0;
-    double vx0 = 0;
+    double vx = 0;
     double vx1 = 0;
     double sumSx = 0;
     double max = 0;
@@ -50,14 +55,16 @@ protected:
 
     double vx1Total = 0;
     double vy1Total = 0;
-signals:
+
+signals:   
     void onStop();
+
 private slots:
     void on_restart_clicked();
 
     void on_plot2D_clicked();
 
-private:
+private:  
     Ui::PositionVelocity *ui;
     void setupParametars(QCustomPlot *plot);
     MainWindow mainwin;

@@ -39,18 +39,11 @@ void PositionVelocity::setupParametars(QCustomPlot *plot)
     plot->addGraph();
     plot->graph(4)->setPen(QPen(QColor(255, 40, 255)));
 
-
-//    QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
-//    timeTicker->setTimeFormat("%ms");
-//    plot->xAxis->setTicker(timeTicker);
-//    plot->axisRect()->setupFullAxesBox();
-//    plot->yAxis->setRange(-0.2, 0.2);
-//    plot->xAxis->setLabel("Time");
-
     plot->setInteraction(QCP::iRangeDrag,true);
     plot->setInteraction(QCP::iRangeZoom,true);
 
     timer.start();
+    timer2.start();
 
 }
 
@@ -87,10 +80,8 @@ void PositionVelocity::plotAxisData(int AxesDecision,double accel, double veloci
         ui->plotVelocity->graph(0)->rescaleValueAxis(true);
         ui->plotVelocity->graph(0)->rescaleKeyAxis(true);
 
-
         ui->plotPosition->yAxis->setLabel("Position values");
         ui->plotPosition->graph(0)->addData(key,position);
-        //rescale value (vertical) axis to fit the current data:
         ui->plotPosition->graph(0)->rescaleValueAxis(true);
         ui->plotPosition->graph(0)->rescaleKeyAxis(true);
         break;
@@ -108,11 +99,7 @@ void PositionVelocity::plotAxisData(int AxesDecision,double accel, double veloci
         ui->plotVelocity->graph(1)->rescaleValueAxis(true);
         ui->plotVelocity->graph(1)->rescaleKeyAxis(true);
 
-        ui->plotPosition->yAxis->setLabel("Position values");
-        ui->plotPosition->graph(1)->addData(key,position);
-        //rescale value (vertical) axis to fit the current data:
-        ui->plotPosition->graph(1)->rescaleValueAxis(true);
-        ui->plotPosition->graph(1)->rescaleKeyAxis(true);
+
         break;
 
         case 2:
@@ -176,140 +163,80 @@ void PositionVelocity::newNumber(MainWindow::data cleanData)
     ax1 = cos(cleanData.zGyroSample)*cleanData.xAccelSample + sin(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleration in x direction
     ay1 = -sin(cleanData.zGyroSample)*cleanData.xAccelSample + cos(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleration in y direction
 
-    double deltaT = 0.05;
-
+    double deltaT = 0.005; // sampleRate
+    double xGyro = cleanData.xGyroSample * 36;
     ax1 = ax1 * 100;
     ay1 = ay1 * 100;
 
-
-    if(ew.abs(ax1) > 15){
-         vx1 = vx0 + (ew.abs(ax1) + ew.abs(ax0))/2 * deltaT;
-         sx1 = sx0 + (ew.abs(vx1) + ew.abs(vx0))/2 * deltaT;
-    }
-    if(ew.abs(ay1) > 15){
-         vy1 = vy0 + (ay1 + ay0)/2 * deltaT;
-         sy1 = sy0 + (vy1 + vy0)/2 * deltaT;
-    }
-
-
-
-    if(timer2.elapsed()> 2){ // a needed a restart becouse of large drift in velocity
-        timer2.restart();
-        ax0 = 0;
-        vx0 = 0;
-        vx1 = 0;
-        sx0 = 0;
-        ay0 = 0;
-        vy0 = 0;
-    }
-    else
-    {
-        ax0 = ax1;
-        vx0 = vx1;
-        sx0 = sx1;
-        ay0 = ay1;
-        vy0 = vy1;
-        sy0 = sy1;
-    }
     if(ui->xAxis->isChecked()){
-        plotAxisData(1,ax1,vx1,sx1);    }
+        if(ew.abs(ax1) > 15){ //start integration
+            if(timer2.elapsed() > 500){
+                timer2.restart();
+                timer3.start();
+            }
+
+
+            if(cleanData.yGyroSample > 15){ //remove slope
+                ax1 = ax1 - cleanData.yGyroSample;
+                }
+            double vx0 = vx1;
+            vx1 += (ew.abs(ax1) + ew.abs(ax0))/2 * deltaT;
+            sx1 += (ew.abs(vx1) + ew.abs(vx0))/2 * deltaT;
+        }
+    }
+    if(ui->yAxis->isChecked()){
+        if(ew.abs(ay1) > 15){
+            timer2.restart();
+            timer3.start();
+
+            if(xGyro > 15){
+                ay1 = ay1 - xGyro;
+                qDebug()<<xGyro;
+                }
+            vy1 = vy0 + (ay1 + ay0)/2 * deltaT;
+            sy1 = sy0 + (vy1 + vy0)/2 * deltaT;
+
+        }
+    }
+
+
+    int index = ui->moveType->currentIndex();
+    if(index == 1){
+        //ax = 0
+        //vx = konst;
+        //sx = raste
+        vx = vx1;
+        if(timer3.elapsed() > 500){
+            timer3.restart();
+            sx +=sx1;
+        }
+    }
+    if(index == 2){
+        //ax = konst
+        //vx = raste/pada
+        //sx = raste/pada
+        if(timer3.elapsed() > 500){
+            timer3.restart();
+        vx += vx1;
+        sx += (vx - vx1)/2 * deltaT;
+        }
+    }
+    if(index == 3)
+        if(timer3.elapsed()>500){
+            //ax = movemant in 0.5 seconds after that wait for another
+            vx1 = 0;
+            vx = 0;
+            sx1 = 0;
+            sx = 0;
+            ax0 = 0;
+    }
+
+    if(ui->xAxis->isChecked()){
+        plotAxisData(0,ax1,vx,sx);    }
     if(ui->yAxis->isChecked()){
         plotAxisData(1,ay1,vy1,sy1);    }
    // if(ui->zAxis->isChecked()){
      //   plotAxisData(1,ax1,vx1,sx1);    }
-}
-
-void PositionVelocity::calculateVelocityPosition(int axisChoice, MainWindow::data cleanData)
-{
-    ExerciseWindow ew;
-
-    if(ew.diffAbs(vx1,vx0) > 0.05 && (ew.abs(ax1) > 0.05)){
-        vx1Total +=vx1;
-    }
-    if(ew.diffAbs(vy1,vy0) > 0.01 && (ew.abs(ay1) > 0.01)){
-        vy1Total +=vy1;
-    }
-    if((ax0 > 0 && ax1 < 0 && vx1Total > 0.5)||(ax0 < 0 && ax1 > 0 && vx1Total < -0.5))
-    {
-    //sx1 = sx0 + (vx1 + vx0)/2 * deltaT;
-    sx1 = vx1Total;
-    }
-
-    if((ay0 > 0 && ay1 < 0 && vy1Total > 0.5)||(ay0 < 0 && ay1 > 0 && vy1Total < -0.5))
-    {
-    //sx1 = sx0 + (vx1 + vx0)/2 * deltaT;
-    sy1 = vy1Total;
-    }
-
-
-
-    //losije od zGyro ali vidi se rezultat
-    ax1 = cos(cleanData.zGyroSample)*cleanData.xAccelSample + sin(cleanData.zGyroSample)*cleanData.yAccelSample; //akceleracija u X smjeru
-    //ay = -sin(cleanData.zGyroSample)*cleanData.xAccelSample + cos(cleanData.zGyroSample)*cleanData.yAccelSample;
-    // YAcc[i]=-sin(kut[i])*XAcc1[i]+cos(kut[i])*YAcc1[i]; //akceleracija u Y smjer
-
-    int dt = 1/43;
-
-
-    vx1 = vx0 * (ax1 + ax0)/2 * dt;
-    sx1 = sx0 * (vx1 + vx0)/2 * dt;
-
-    ax0 = ax1;
-    vx0 = vx1;
-    sx0 = sx1;
-    plotAxisData(axisChoice,ax1,vx1,sx1);
-   /* double value = cleanData.zAccelSample*100;
-
-
-    double pi = 3.14;
-    double D;
-    D = ax1/(2* pi*pi * 43 * sin(2* pi * 43));
-    //vx1 = 3.14 * 43 * D * cos(2*pi*43);
-    //sx1 = D * sin(2*pi*43)/2;
-
-
-    D = ay1/(2* pi*pi * 43 * sin(2* pi * 43));
-    vy1 = 3.14 * 43 * D * cos(2*pi*43);
-    sy1 = D * sin(2*pi*43)/2;
-
-
-
-    int zMax;
-    if(zMax < value){
-        zMax = value;
-    }else{
-        //value = zMax;
-    }
-    counter++;
-
-    if(timer.elapsed()>1)
-    {
-        if((zAccelTmp > 0 && cleanData.zAccelSample < 0 )||(zAccelTmp < 0 && cleanData.zAccelSample > 0 ))
-        {
-            velocity += timer.elapsed() * cleanData.zAccelSample;
-
-            zPos = velocity / timer.elapsed();
-            timer.restart();
-
-        }
-        zAccelTmp = cleanData.zAccelSample;
-    }
-    if(cleanData.zAccelSample < 1)
-        zPos = abs(cleanData.xGyroSample*100) + abs(cleanData.yGyroSample*100);
-    else if (cleanData.zAccelSample > 1)
-        zPos = -abs(cleanData.xGyroSample*100) - abs(cleanData.yGyroSample*100);
-
-
-    //last_x = K * (last_x + gyro_x_delta) + (K1 * rotation_x)
-    //last_y = K * (last_y + gyro_y_delta) + (K1 * rotation_y)
-    if(counter == 5){
-        counter=0;
-    }
-        double cc =2*3.14*counter*200;
-        zPos = -sin(cc);
-
-    plotAxisData(2,value,velocity,zPos);
-*/
 }
 
 void PositionVelocity::on_pause_clicked()

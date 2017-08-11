@@ -28,6 +28,8 @@ void ExerciseWindow::setupParametars()
     ui->yGyroSlider->setMinimum(-90);
     ui->yGyroSlider->setMaximum(90);
 
+    timer2.start();
+
 }
 
 void ExerciseWindow::on_start_clicked()
@@ -76,9 +78,14 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
     yGyroTmp = yGyro;
 
     //remove the drift with help of accel values
-    if(abs(cleanData.xAccelSample) < 0.05 && abs(cleanData.yAccelSample) < 0.05){
+    if(abs(cleanData.xAccelSample) < 0.1 && abs(cleanData.yAccelSample) < 0.1){
         xGyroSum = 0;
         yGyroSum = 0;
+    }
+
+    if(abs(cleanData.xAccelSample) > 0.85 && abs(cleanData.yAccelSample) > 0.85){
+        xGyroSum = 90;
+        yGyroSum = 90;
     }
     double xAxisMove = 0.3 * xGyroSum + 0.7 * cleanData.yAccelSample * 90; //xGyro axis rotation
     double yAxisMove = 0.3 * yGyroSum - 0.7 * cleanData.xAccelSample * 90; //yGyr0 - xAccel is different orientation so it must be - before
@@ -123,10 +130,10 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
 
     }
     // drift can cause values to grow to much so we need to secure the possibility
-    else if(yAxisMove < -60 || yAxisMove > 60){
+    else if(abs(yAxisMove) > 90){
         yGyroSum = 0;
     }
-    else if(xAxisMove < -60 || xAxisMove > 60){
+    else if(abs(xAxisMove) > 90){
         xGyroSum = 0;
     }
     else{
@@ -135,12 +142,18 @@ void ExerciseWindow::newNumber(MainWindow::data cleanData)
 
     if((zGyroTmp > 0 && cleanData.zGyroSample < 0 )||(zGyroTmp < 0 && cleanData.zGyroSample > 0 ))
     {
-    speedInterval();
-    if (flag == 0){
-        countExercise++;
-        ui->counter->setText(QString::number(countExercise));
-    }
-
+        speedInterval();
+        if (flag == 0){
+            if(timer2.elapsed()>200){
+                timer2.restart();
+                countExercise++;
+                if(countExercise == 2){
+                    counter++;
+                    countExercise = 0;
+                    ui->counter->setText(QString::number(counter));
+                }
+            }
+        }
     }
     zGyroTmp = zGyro;
 }
